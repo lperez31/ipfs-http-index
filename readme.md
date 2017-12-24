@@ -26,14 +26,15 @@ http://[IP_OF_YOUR_SERVER]/index.json
 
 The json file contains the names of every file and the IPFS hash.
 
-## Installation instructions
+## Installation 
 
-* Clone this directory
+* Clone this repository
+* cd to this project directory
 * Execute setup.sh
 * In docker-compose.yml, change PUBLICHOST value to your server domain name or IP
 * Execute "docker-compose up"
 * Create ftp user:
-  * Get into the ftp container with this command: docker-compose exec pureftp bash
+  * In another terminal, cd to this project directory, and get into the ftp container with this command: docker-compose exec pureftpd bash
   * Create the database: pure-pw mkdb
   * Create ftp user: pure-pw useradd REPLACE_BY_YOUR_USER_NAME -m -u ftpuser -d /home/ftpuser
   * Exit: exit
@@ -41,8 +42,13 @@ The json file contains the names of every file and the IPFS hash.
 That's all. You should be able to:
 
 * Connect by ftp with the user you have just created
+* Send files
 * See a index.json file with your browser
 * Get the files with IPFS
+
+For more info on pureftpd commands:
+
+
 
 ## Licence
 
