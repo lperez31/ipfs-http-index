@@ -1,0 +1,46 @@
+version: '3.3'
+
+services:
+
+  ipfs:
+    image: jbenet/go-ipfs:latest
+    container_name: ipfs-container
+    ports:
+      - "8080:8080"
+      - "4001:4001"
+      - "127.0.0.1:5001:5001"
+    volumes:
+      - ./tmp/ipfs-docker-data:/data/ipfs
+      - "./ipfsdocs:/dir_monitoring/to_monitor"
+
+  monitoring:
+    build: dir_monitoring/.
+    privileged: true
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./tmp:/dir_monitoring/tmp"
+      - "./htdocs:/dir_monitoring/htdocs"
+      - "./ipfsdocs:/dir_monitoring/to_monitor"
+      - "./dir_monitoring:/dir_monitoring/src"
+    working_dir: "/dir_monitoring/src"
+    command: python -u monitoring.py
+  
+  apache:
+    image: httpd:2.4
+    volumes:
+      - "./htdocs:/usr/local/apache2/htdocs/"
+    ports:
+      - "80:80"
+
+  pureftpd:
+    image: stilliard/pure-ftpd:hardened
+    environment:
+      - PUBLICHOST:localhost
+    ports:
+      - "21:21"
+      - "30000-30009:30000-30009"
+    volumes:
+      - ./ipfsdocs:/home/ftpuser
+      - ./ftp/ftp_data:/etc/pure-ftpd
+    privileged: true
+    restart: always 
