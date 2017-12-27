@@ -46,6 +46,8 @@ That's all. You should be able to:
 * See a index.json file with your browser
 * Get the files with IPFS
 
+If you cannot transfer files with ftp, you may have to give permissions to your ftp user on the ./ipfsdocs directory.
+
 For more info on pureftpd commands:
 
 
