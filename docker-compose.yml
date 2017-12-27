@@ -12,6 +12,7 @@ services:
     volumes:
       - ./tmp/ipfs-docker-data:/data/ipfs
       - "./ipfsdocs:/dir_monitoring/to_monitor"
+    restart: always 
 
   monitoring:
     build: dir_monitoring/.
@@ -24,13 +25,15 @@ services:
       - "./dir_monitoring:/dir_monitoring/src"
     working_dir: "/dir_monitoring/src"
     command: python -u monitoring.py
-  
+    restart: always
+
   apache:
     image: httpd:2.4
     volumes:
       - "./htdocs:/usr/local/apache2/htdocs/"
     ports:
       - "80:80"
+    restart: always 
 
   pureftpd:
     image: stilliard/pure-ftpd:hardened
@@ -43,4 +46,4 @@ services:
       - ./ipfsdocs:/home/ftpuser
       - ./ftp/ftp_data:/etc/pure-ftpd
     privileged: true
-    restart: always 
+    restart: always
