@@ -35,8 +35,8 @@ The json file contains the names of every file and the IPFS hash.
 * Execute "docker-compose up"
 * Create ftp user:
   * In another terminal, cd to this project directory, and get into the ftp container with this command: docker-compose exec pureftpd bash
-  * Create the database: pure-pw mkdb
   * Create ftp user: pure-pw useradd REPLACE_BY_YOUR_USER_NAME -m -u ftpuser -d /home/ftpuser
+  * Create the database: pure-pw mkdb
   * Exit: exit
 
 That's all. You should be able to:
@@ -45,6 +45,8 @@ That's all. You should be able to:
 * Send files
 * See a index.json file with your browser
 * Get the files with IPFS
+
+If you cannot transfer files with ftp, you may have to give permissions to your docker user on the ./ipfsdocs directory.
 
 For more info on pureftpd commands:
 
