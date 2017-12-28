@@ -36,9 +36,9 @@ services:
     restart: always 
 
   pureftpd:
-    image: stilliard/pure-ftpd:hardened
+    image: stilliard/pure-ftpd:latest
     environment:
-      - PUBLICHOST:localhost
+      - PUBLICHOST=localhost
     ports:
       - "21:21"
       - "30000-30009:30000-30009"
