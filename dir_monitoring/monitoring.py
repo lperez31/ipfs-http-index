@@ -35,6 +35,16 @@ print("--------------------------")
 # Wait for other containers to start
 time.sleep(10)
 
+##############################
+# Load current IPFS state
+##############################
+try:
+	with open(savePath, 'rb') as input:
+	    currentIPFSState = pickle.load(input)
+except FileNotFoundError:
+	# First launch: initialize currentIPFSState to empty dict
+	currentIPFSState = {}
+
 # Main loop
 while True:
 
@@ -43,26 +53,16 @@ while True:
 	print("Looking for modifications in directory")
 
 	##############################
-	# Load current IPFS state
-	##############################
-	try:
-		with open(savePath, 'rb') as input:
-		    currentIPFSState = pickle.load(input)
-	except FileNotFoundError:
-		# First launch: initialize currentIPFSState to empty dict
-		currentIPFSState = {}
-
-	##############################
 	# Scan monitored directory
 	##############################
 
 	# get all entries in the directory w/ stats
-	entries = (os.path.join(dirPath, fn) for fn in os.listdir(dirPath))
-	entries = ((os.stat(path), path) for path in entries)
+	entries = ((os.path.join(dirPath, fn), fn) for fn in os.listdir(dirPath))
+	entries = ((os.stat(path), path, fn) for path, fn in entries)
 
 	# leave only regular files, insert creation date
-	entries = [(stat[ST_CTIME], path)
-	           for stat, path in entries if S_ISREG(stat[ST_MODE])]
+	entries = [(stat[ST_CTIME], path, fn)
+	           for stat, path, fn in entries if S_ISREG(stat[ST_MODE])]
 
 
 	###############################
@@ -84,11 +84,13 @@ while True:
 	print ("Removing files from IPFS...")
 	count = 0
 	for mHash in filesToRemove:
-		count += 1
-		# Remove file from ipfs
-		print("Removing file from IPFS: ", mHash, currentIPFSState[mHash][1])
-		response = system_call("ipfs pin rm " + mHash)
-		print (response.strip().decode('UTF-8'))
+		# This test protects again empty hash which may cause a freeze in system_call
+		if mHash != "":
+			count += 1
+			# Remove file from ipfs
+			print("Removing file from IPFS: ", mHash, currentIPFSState[mHash][1])
+			response = system_call("ipfs pin rm " + mHash)
+			print (response.strip().decode('UTF-8'))
 		# Remove file from dictionary
 		currentIPFSState.pop(mHash, None)
 
@@ -101,9 +103,9 @@ while True:
 		count += 1
 		# Add file to ipfs
 		print("Adding file: ", f[1])
-		mHash = system_call("ipfs add -q " + f[1])
+		mHash = system_call("ipfs add -q \"" + f[1] + "\"")
 		mHash = mHash.strip().decode('UTF-8')
-		print (mHash)
+		print (mHash, f)
 		currentIPFSState[mHash] = f
 
 	print ("%i files added." % count)
@@ -121,7 +123,7 @@ while True:
 
 	print ("Saving index file: %s" % indexFile)
 	index = [{	'hash': mHash,
-				'file': currentIPFSState[mHash][1],
+				'file': currentIPFSState[mHash][2],
 				'uploaded_at': datetime.utcfromtimestamp(currentIPFSState[mHash][0]).strftime('%Y-%m-%dT%H:%M:%SZ')}
 				for mHash in currentIPFSState]
 
