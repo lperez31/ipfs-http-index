@@ -9,6 +9,7 @@ import pickle
 import subprocess
 from datetime import datetime
 import json
+import ipfsapi
 
 dirPath = "/dir_monitoring/to_monitor"
 savePath = "/dir_monitoring/tmp/files.pkl"
@@ -20,20 +21,14 @@ def save_object(obj, filename):
     with open(filename, 'wb') as output:
         pickle.dump(obj, output)
 
-# Make a system call
-def system_call(command, from_docker=True):
-	if from_docker:
-		command = "docker exec ipfs-container " + command
-	print("Executing: ", command)
-	p = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
-	return p.stdout.read()
-
 print("--------------------------")
 print("Welcome to IPFS monitoring")
 print("--------------------------")
 
 # Wait for other containers to start
 time.sleep(10)
+
+api = ipfsapi.connect('ipfs', 5001)
 
 ##############################
 # Load current IPFS state
@@ -89,8 +84,8 @@ while True:
 			count += 1
 			# Remove file from ipfs
 			print("Removing file from IPFS: ", mHash, currentIPFSState[mHash][1])
-			response = system_call("ipfs pin rm " + mHash)
-			print (response.strip().decode('UTF-8'))
+			response = api.pin_rm(mHash)
+			print (response)
 		# Remove file from dictionary
 		currentIPFSState.pop(mHash, None)
 
@@ -103,10 +98,13 @@ while True:
 		count += 1
 		# Add file to ipfs
 		print("Adding file: ", f[1])
-		mHash = system_call("ipfs add -q \"" + f[1] + "\"")
-		mHash = mHash.strip().decode('UTF-8')
-		print (mHash, f)
-		currentIPFSState[mHash] = f
+		try:
+			res = api.add(f[1])
+			mHash = res['Hash']
+			print (mHash, f)
+			currentIPFSState[mHash] = f
+		except:
+			print("Error in adding file to IPFS")
 
 	print ("%i files added." % count)
 

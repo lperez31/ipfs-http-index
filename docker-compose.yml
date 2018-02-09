@@ -16,9 +16,7 @@ services:
 
   monitoring:
     build: dir_monitoring/.
-    privileged: true
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
       - "./tmp:/dir_monitoring/tmp"
       - "./htdocs:/dir_monitoring/htdocs"
       - "./ipfsdocs:/dir_monitoring/to_monitor"
