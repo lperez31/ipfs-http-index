@@ -128,10 +128,28 @@ while True:
 	with open(indexFile, 'w') as outfile:
 	    json.dump(index, outfile)
 
-	print ("IPFS monitoring going to sleep for %d seconds" % time_to_sleep)
-	print ("-----------------------------------------------------")
+
+	#####################################
+	# Garbage collect IPFS datastore
+	#####################################
+	
+	print ("Launching IPFS garbage collector")
+
+	print ("Repo stats before garbage collection:")
+	print (api.repo_stat())
+
+	result_gc = api.repo_gc()
+	print ("Result of garbage collection:")
+	print (result_gc)
+
+	print ("Repo stats after garbage collection:")
+	print (api.repo_stat())
 
 	#####################################
 	# Sleep for some time
 	#####################################
+	
+	print ("IPFS monitoring going to sleep for %d seconds" % time_to_sleep)
+	print ("-----------------------------------------------------")
+	
 	time.sleep(time_to_sleep)
